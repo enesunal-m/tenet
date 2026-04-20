@@ -1,0 +1,23 @@
+[package]
+name = "tenet"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+rust-version = "1.75"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0.9"
+toml = "0.8"
+walkdir = "2"
+chrono = { version = "0.4", features = ["serde"] }
+globset = "0.4"
+anyhow = "1"
+thiserror = "1"
+dialoguer = "0.11"
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"
+tempfile = "3"
