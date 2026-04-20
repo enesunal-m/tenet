@@ -30,7 +30,7 @@ include = [
 clap = { version = "=4.5.23", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
-toml = "0.8"
+toml = "1.1"
 walkdir = "2"
 chrono = { version = "0.4", features = ["serde"] }
 globset = "0.4"
