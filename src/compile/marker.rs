@@ -13,9 +13,10 @@ pub fn is_generated_agents(path: &Path) -> Result<bool, TenetError> {
         source,
     })?;
 
-    Ok(content
-        .lines()
-        .next()
-        .map(|line| line.starts_with(GENERATED_HEADER))
-        .unwrap_or(false))
+    Ok(content.is_empty()
+        || content
+            .lines()
+            .next()
+            .map(|line| line.starts_with(GENERATED_HEADER))
+            .unwrap_or(false))
 }
