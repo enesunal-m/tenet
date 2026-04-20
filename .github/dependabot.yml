@@ -14,6 +14,10 @@ updates:
       rust-minor:
         update-types:
           - minor
+    ignore:
+      - dependency-name: clap
+        versions:
+          - ">= 4.6.0"
     commit-message:
       prefix: deps
       include: scope

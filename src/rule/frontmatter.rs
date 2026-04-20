@@ -4,20 +4,15 @@ use serde::Deserialize;
 use crate::error::TenetError;
 
 /// Supported priority values in rule frontmatter.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Priority {
     /// High-priority rule.
     High,
     /// Normal-priority rule.
+    #[default]
     Normal,
     /// Low-priority rule.
     Low,
-}
-
-impl Default for Priority {
-    fn default() -> Self {
-        Self::Normal
-    }
 }
 
 /// Parsed frontmatter values.

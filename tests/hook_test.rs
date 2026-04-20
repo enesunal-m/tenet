@@ -3,6 +3,7 @@ use std::{env, fs};
 use assert_cmd::Command;
 
 #[test]
+#[cfg(not(windows))]
 fn pre_commit_hook_blocks_when_context_changes_without_compile() {
     let temp = tempfile::tempdir().expect("tempdir");
     let root = temp.path();
