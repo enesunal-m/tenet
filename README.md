@@ -22,7 +22,7 @@ From a checkout without installing:
 cargo run -- <command>
 ```
 
-Rust 1.75 or newer is required.
+Rust 1.85 or newer is required.
 
 ## Quickstart
 

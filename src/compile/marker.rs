@@ -13,7 +13,7 @@ pub fn is_generated_agents(path: &Path) -> Result<bool, TenetError> {
         source,
     })?;
 
-    Ok(content.is_empty()
+    Ok(content.trim().is_empty()
         || content
             .lines()
             .next()
