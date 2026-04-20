@@ -35,3 +35,25 @@ fn compile_writes_root_agents_with_single_rule() {
     let agents_again = fs::read_to_string(root.join("AGENTS.md")).expect("read agents");
     assert_eq!(agents, agents_again);
 }
+
+#[test]
+fn compile_exits_one_when_rule_frontmatter_is_invalid() {
+    let temp = tempfile::tempdir().expect("tempdir");
+    let root = temp.path();
+
+    fs::create_dir_all(root.join(".context/invariants")).expect("mkdir");
+    fs::write(
+        root.join(".context/invariants/bad.md"),
+        "---\npriority: urgent\n---\nDo not compile\n",
+    )
+    .expect("write rule");
+
+    Command::cargo_bin("tenet")
+        .expect("bin")
+        .current_dir(root)
+        .args(["compile"])
+        .assert()
+        .code(1);
+
+    assert!(!root.join("AGENTS.md").exists());
+}

@@ -64,6 +64,12 @@ pub enum TenetError {
     /// Stale rules were detected.
     #[error("stale rules found")]
     StaleRulesFound,
+    /// One or more rule files could not be parsed or validated.
+    #[error("{count} invalid rule file(s)")]
+    InvalidRules {
+        /// Number of invalid rules encountered.
+        count: usize,
+    },
     /// Lint produced warnings.
     #[error("lint warnings")]
     LintWarnings,

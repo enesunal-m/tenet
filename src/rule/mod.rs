@@ -10,6 +10,8 @@ pub mod frontmatter;
 pub mod id;
 pub mod scope;
 
+type RuleLoadErrors = Vec<(std::path::PathBuf, TenetError)>;
+
 /// Canonical rule type.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RuleType {
@@ -26,7 +28,7 @@ pub enum RuleType {
 }
 
 impl RuleType {
-    fn from_dir_name(value: &str) -> Option<Self> {
+    pub(crate) fn from_dir_name(value: &str) -> Option<Self> {
         match value {
             "invariants" => Some(Self::Invariants),
             "conventions" => Some(Self::Conventions),
@@ -55,12 +57,44 @@ pub struct Rule {
 
 /// Load all recognized `.context/<type>/*.md` rules from `repo_root`.
 pub fn load_all(repo_root: &Path) -> Result<Vec<Rule>, TenetError> {
+    let (rules, errors) = load_all_with_errors(repo_root)?;
+    if let Some((_path, error)) = errors.into_iter().next() {
+        return Err(error);
+    }
+    Ok(rules)
+}
+
+/// Load recognized rules and collect parse errors instead of failing fast.
+pub fn load_all_lenient(repo_root: &Path) -> Result<Vec<RuleLoad>, TenetError> {
+    let (rules, errors) = load_all_with_errors(repo_root)?;
+    let mut loaded = Vec::new();
+    loaded.extend(rules.into_iter().map(RuleLoad::Valid));
+    loaded.extend(
+        errors
+            .into_iter()
+            .map(|(path, error)| RuleLoad::Invalid { path, error }),
+    );
+    Ok(loaded)
+}
+
+/// Result of lenient rule loading.
+#[derive(Debug)]
+pub enum RuleLoad {
+    Valid(Rule),
+    Invalid {
+        path: std::path::PathBuf,
+        error: TenetError,
+    },
+}
+
+fn load_all_with_errors(repo_root: &Path) -> Result<(Vec<Rule>, RuleLoadErrors), TenetError> {
     let context_root = repo_root.join(".context");
     if !context_root.exists() {
-        return Ok(Vec::new());
+        return Ok((Vec::new(), Vec::new()));
     }
 
     let mut rules = Vec::new();
+    let mut errors = Vec::new();
 
     for entry in WalkDir::new(&context_root)
         .into_iter()
@@ -87,7 +121,13 @@ pub fn load_all(repo_root: &Path) -> Result<Vec<Rule>, TenetError> {
             path: path.display().to_string(),
             source,
         })?;
-        let parsed = parse_rule_document(&raw)?;
+        let parsed = match parse_rule_document(&raw) {
+            Ok(value) => value,
+            Err(error) => {
+                errors.push((path, error));
+                continue;
+            }
+        };
         let id = rule_id_from_path(&path)?;
 
         rules.push(Rule {
@@ -100,7 +140,8 @@ pub fn load_all(repo_root: &Path) -> Result<Vec<Rule>, TenetError> {
     }
 
     rules.sort_by(|left, right| left.id.cmp(&right.id));
-    Ok(rules)
+    errors.sort_by(|left, right| left.0.cmp(&right.0));
+    Ok((rules, errors))
 }
 
 #[cfg(test)]

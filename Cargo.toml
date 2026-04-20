@@ -4,6 +4,28 @@ version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
 rust-version = "1.75"
+description = "Compile structured .context rule files into nested AGENTS.md files for AI coding agents."
+readme = "README.md"
+repository = "https://github.com/enesunal-m/tenet"
+homepage = "https://github.com/enesunal-m/tenet"
+documentation = "https://github.com/enesunal-m/tenet#readme"
+keywords = ["agents", "context", "cli", "rust", "ai"]
+categories = ["command-line-utilities", "development-tools"]
+include = [
+    "src/**",
+    "tests/**",
+    "Cargo.toml",
+    "Cargo.lock",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "CHANGELOG.md",
+    "spec.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "CODE_OF_CONDUCT.md",
+    "docs/**",
+]
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
@@ -16,6 +38,7 @@ globset = "0.4"
 anyhow = "1"
 thiserror = "1"
 dialoguer = "0.11"
+regex = "1"
 
 [dev-dependencies]
 assert_cmd = "2"

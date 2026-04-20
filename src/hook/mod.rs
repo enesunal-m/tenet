@@ -1,4 +1,4 @@
-use std::{fs, os::unix::fs::PermissionsExt, path::Path};
+use std::{fs, path::Path};
 
 use crate::error::TenetError;
 
@@ -35,11 +35,23 @@ pub fn install_pre_commit_hook(repo_root: &Path) -> Result<(), TenetError> {
         source,
     })?;
 
-    let permissions = fs::Permissions::from_mode(0o755);
-    fs::set_permissions(&hook_path, permissions).map_err(|source| TenetError::Io {
-        path: hook_path.display().to_string(),
-        source,
-    })?;
+    make_executable(&hook_path)?;
 
+    Ok(())
+}
+
+#[cfg(unix)]
+fn make_executable(path: &Path) -> Result<(), TenetError> {
+    use std::os::unix::fs::PermissionsExt;
+
+    let permissions = fs::Permissions::from_mode(0o755);
+    fs::set_permissions(path, permissions).map_err(|source| TenetError::Io {
+        path: path.display().to_string(),
+        source,
+    })
+}
+
+#[cfg(not(unix))]
+fn make_executable(_path: &Path) -> Result<(), TenetError> {
     Ok(())
 }

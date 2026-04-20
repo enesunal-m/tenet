@@ -16,7 +16,22 @@ pub fn compile_repo(
     dry_run: bool,
     exclude_stale: bool,
 ) -> Result<Vec<std::path::PathBuf>, TenetError> {
-    let rules = rule::load_all(repo_root)?;
+    let mut rules = Vec::new();
+    let mut invalid_count = 0;
+    for item in rule::load_all_lenient(repo_root)? {
+        match item {
+            rule::RuleLoad::Valid(rule) => rules.push(rule),
+            rule::RuleLoad::Invalid { path, error } => {
+                invalid_count += 1;
+                eprintln!("error: skipping invalid rule {}: {error}", path.display());
+            }
+        }
+    }
+    if invalid_count > 0 {
+        return Err(TenetError::InvalidRules {
+            count: invalid_count,
+        });
+    }
     let cfg = config::load(repo_root)?.config;
     let options = plan::PlanOptions {
         include_stale: if exclude_stale {

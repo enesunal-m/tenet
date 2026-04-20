@@ -51,6 +51,7 @@ fn exit_code_for_tenet_error(error: &TenetError) -> i32 {
         | TenetError::AbsoluteScope { .. }
         | TenetError::InvalidScope { .. }
         | TenetError::BadFrontmatterValue { .. }
+        | TenetError::InvalidRules { .. }
         | TenetError::StaleRulesFound
         | TenetError::LintWarnings => 1,
         TenetError::LintErrors => 2,

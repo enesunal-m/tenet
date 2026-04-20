@@ -57,7 +57,10 @@ fn pre_commit_hook_blocks_when_context_changes_without_compile() {
     let tenet_bin = assert_cmd::cargo::cargo_bin("tenet");
     let bin_dir = tenet_bin.parent().expect("bin parent");
     let current_path = env::var("PATH").unwrap_or_default();
-    let merged_path = format!("{}:{}", bin_dir.display(), current_path);
+    let merged_path = env::join_paths(
+        std::iter::once(bin_dir.to_path_buf()).chain(env::split_paths(&current_path)),
+    )
+    .expect("join PATH");
     Command::new("git")
         .current_dir(root)
         .env("PATH", merged_path)

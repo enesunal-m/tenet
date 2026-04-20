@@ -9,7 +9,7 @@ use serde::Deserialize;
 use crate::error::TenetError;
 
 /// Top-level tenet configuration loaded from `.tenetrc`.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct TenetConfig {
     /// Default values for rule metadata.
     pub defaults: DefaultsConfig,
@@ -19,17 +19,6 @@ pub struct TenetConfig {
     pub lint: LintConfig,
     /// Hook installation behavior.
     pub hook: HookConfig,
-}
-
-impl Default for TenetConfig {
-    fn default() -> Self {
-        Self {
-            defaults: DefaultsConfig::default(),
-            compile: CompileConfig::default(),
-            lint: LintConfig::default(),
-            hook: HookConfig::default(),
-        }
-    }
 }
 
 /// Defaults section from `.tenetrc`.

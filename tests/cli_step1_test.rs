@@ -1,5 +1,6 @@
 use assert_cmd::Command;
 use predicates::str::contains;
+use std::fs;
 
 #[test]
 fn help_displays_subcommands() {
@@ -22,17 +23,61 @@ fn version_subcommand_prints_semver() {
 }
 
 #[test]
-fn init_stub_reports_not_implemented() {
-    let mut cmd = Command::cargo_bin("tenet").expect("binary exists");
-    cmd.arg("init");
+fn init_scaffolds_context_without_hook() {
+    let temp = tempfile::tempdir().expect("tempdir");
+    let root = temp.path();
 
-    cmd.assert().success().stdout(contains("not implemented"));
+    Command::new("git")
+        .current_dir(root)
+        .args(["init"])
+        .assert()
+        .success();
+
+    Command::cargo_bin("tenet")
+        .expect("binary exists")
+        .current_dir(root)
+        .args(["init", "--no-hook"])
+        .assert()
+        .success()
+        .stdout(contains("initialized tenet"));
+
+    assert!(root.join(".context/invariants/example.md").exists());
+    assert!(root.join(".tenetrc").exists());
+    assert!(root.join("AGENTS.md").exists());
 }
 
 #[test]
-fn add_stub_accepts_type_and_reports_not_implemented() {
-    let mut cmd = Command::cargo_bin("tenet").expect("binary exists");
-    cmd.args(["add", "invariants"]);
+fn add_accepts_type_and_required_flags() {
+    let temp = tempfile::tempdir().expect("tempdir");
+    let root = temp.path();
 
-    cmd.assert().success().stdout(contains("not implemented"));
+    Command::new("git")
+        .current_dir(root)
+        .args(["init"])
+        .assert()
+        .success();
+
+    fs::create_dir_all(root.join(".context/invariants")).expect("mkdir");
+
+    Command::cargo_bin("tenet")
+        .expect("binary exists")
+        .current_dir(root)
+        .env("EDITOR", "true")
+        .args([
+            "add",
+            "invariants",
+            "--scope",
+            "**",
+            "--owner",
+            "alice",
+            "--priority",
+            "normal",
+            "--title",
+            "CLI smoke",
+        ])
+        .assert()
+        .success()
+        .stdout(contains("invariants/cli-smoke"));
+
+    assert!(root.join(".context/invariants/cli-smoke.md").exists());
 }

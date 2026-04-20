@@ -61,20 +61,26 @@ pub fn parse_rule_document(input: &str) -> Result<ParsedRuleDoc, TenetError> {
     }
 
     let remainder = &normalized[4..];
-    let Some(close_idx) = remainder.find("\n---\n") else {
-        return Err(TenetError::BadFrontmatter {
-            message: String::from("frontmatter start found without closing delimiter"),
-        });
-    };
+    let (yaml_text, body_start) = if remainder.starts_with("---\n") {
+        ("", "---\n".len())
+    } else {
+        let Some(close_idx) = remainder.find("\n---\n") else {
+            return Err(TenetError::BadFrontmatter {
+                message: String::from("frontmatter start found without closing delimiter"),
+            });
+        };
 
-    let yaml_text = &remainder[..close_idx];
-    let body_start = close_idx + "\n---\n".len();
+        (&remainder[..close_idx], close_idx + "\n---\n".len())
+    };
     let body = remainder[body_start..].to_string();
 
-    let raw: RawFrontmatter =
+    let raw: RawFrontmatter = if yaml_text.trim().is_empty() {
+        RawFrontmatter::default()
+    } else {
         serde_yaml::from_str(yaml_text).map_err(|source| TenetError::BadFrontmatter {
             message: source.to_string(),
-        })?;
+        })?
+    };
 
     let priority = parse_priority(raw.priority.as_deref())?;
     let reviewed = parse_reviewed(raw.reviewed.as_deref())?;
@@ -123,7 +129,7 @@ fn parse_reviewed(value: Option<&str>) -> Result<Option<NaiveDate>, TenetError> 
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 struct RawFrontmatter {
     #[serde(default)]
     scope: Option<String>,
@@ -161,6 +167,14 @@ mod tests {
         assert!(parsed.had_frontmatter);
         assert_eq!(parsed.frontmatter.scope.as_deref(), Some("apps/**"));
         assert_eq!(parsed.frontmatter.priority, Priority::High);
+        assert_eq!(parsed.body, "Body\n");
+    }
+
+    #[test]
+    fn parses_empty_frontmatter_as_defaults() {
+        let parsed = parse_rule_document("---\n---\nBody\n").expect("parse");
+        assert!(parsed.had_frontmatter);
+        assert_eq!(parsed.frontmatter.priority, Priority::Normal);
         assert_eq!(parsed.body, "Body\n");
     }
 

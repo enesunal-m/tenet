@@ -40,7 +40,7 @@ pub fn run(from_path: String, yes: bool, mapping: Option<String>) -> anyhow::Res
             ];
             let selection = Select::new()
                 .with_prompt(format!("Type for section '{}'?", section.title))
-                .items(options)
+                .items(&options)
                 .default(0)
                 .interact()?;
             let selected = options[selection].to_string();
