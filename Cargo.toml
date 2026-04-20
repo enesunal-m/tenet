@@ -3,7 +3,7 @@ name = "tenet"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-rust-version = "1.75"
+rust-version = "1.85"
 description = "Compile structured .context rule files into nested AGENTS.md files for AI coding agents."
 readme = "README.md"
 repository = "https://github.com/enesunal-m/tenet"
@@ -30,13 +30,13 @@ include = [
 clap = { version = "=4.5.23", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
-toml = "0.8"
+toml = "1"
 walkdir = "2"
 chrono = { version = "0.4", features = ["serde"] }
 globset = "0.4"
 anyhow = "1"
 thiserror = "1"
-dialoguer = "0.11"
+dialoguer = "0.12"
 regex = "1"
 
 [dev-dependencies]

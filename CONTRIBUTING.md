@@ -6,7 +6,7 @@ Thanks for taking the time to improve `tenet`.
 
 Requirements:
 
-- Rust 1.75 or newer
+- Rust 1.85 or newer
 - Git
 
 Run the standard checks before opening a pull request:
