@@ -57,3 +57,27 @@ fn compile_exits_one_when_rule_frontmatter_is_invalid() {
 
     assert!(!root.join("AGENTS.md").exists());
 }
+
+#[test]
+fn compile_skips_leading_blank_lines_when_rendering_rule_lead() {
+    let temp = tempfile::tempdir().expect("tempdir");
+    let root = temp.path();
+
+    fs::create_dir_all(root.join(".context/invariants")).expect("mkdir");
+    fs::write(
+        root.join(".context/invariants/global.md"),
+        "---\nscope: \"**\"\n---\n\nAlways run tests\n",
+    )
+    .expect("write rule");
+
+    Command::cargo_bin("tenet")
+        .expect("bin")
+        .current_dir(root)
+        .args(["compile"])
+        .assert()
+        .success();
+
+    let agents = fs::read_to_string(root.join("AGENTS.md")).expect("read agents");
+    assert!(agents.contains("- **Always run tests**"));
+    assert!(!agents.contains("(empty rule)"));
+}

@@ -38,7 +38,13 @@ pub fn render_agents_md(
     if !stale_rules.is_empty() {
         out.push_str("## Needs review\n\n");
         for rule in stale_rules {
-            let lead = rule.body.lines().next().unwrap_or_default().trim();
+            let lead = rule
+                .body
+                .trim_start()
+                .lines()
+                .next()
+                .unwrap_or_default()
+                .trim();
             out.push_str(&format!(
                 "- **{}**\n\n",
                 if lead.is_empty() {
@@ -87,7 +93,7 @@ fn render_section(out: &mut String, title: &str, target_type: RuleType, rules: &
     out.push_str(&format!("## {title}\n\n"));
 
     for rule in filtered {
-        let mut lines = rule.body.lines();
+        let mut lines = rule.body.trim_start().lines();
         let lead = lines
             .next()
             .unwrap_or_default()
